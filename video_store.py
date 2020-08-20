@@ -74,9 +74,6 @@ def storeClient(name, cpf, rg):
         }
         write(CLIENTS_FIELD_NAMES, clientData, CLIENTS_PATH)
     
-storeClient('testing', '022-222-123-21', '123.232.12')
-storeClient('testing2', '023-232-333-12', '111.111.11')
-
 def storeMovie(type, code, name, year):
     """
     Given the type, code, name and year of a movie,
@@ -90,8 +87,6 @@ def storeMovie(type, code, name, year):
             YEAR_KEY: year
         }
         write(MOVIES_FIELD_NAMES, movieData, MOVIES_PATH)
-
-storeMovie("dvd", 223, "test", 2001)
 
 def rentMovie(name, movieCode, date):
     """
@@ -140,9 +135,25 @@ def listLateRents():
     except:
         print("Couldn't open rents.csv")
 
+# Store two clients
+storeClient('Jose Augusto', '123.222.312-12', '3.123.234')
+storeClient('Sara Moura', '222.222.222-22', '1.223.245')
+storeClient('Pedro Afonso', '204.252.231-22', '1.256.212')
+
+# Store 6 DVDs
+storeMovie('DVD', '123', 'Jumanji', '2001')
+storeMovie('DVD', '124', 'Batman', '2000')
+storeMovie('DVD', '125', 'Superman', '2015')
+storeMovie('DVD', '126', 'Coringa', '2019')
+storeMovie('DVD', '127', 'Ant Man', '2017')
+storeMovie('DVD', '128', 'The Godfather', '1972')
+
 today = datetime.now()
-past_date = today - timedelta(days = 8)
+late_date = today - timedelta(days = 8)
 
-rentMovie("testing", 223, past_date)
+# Make 2 rents (one late)
+rentMovie('Jose Augusto', '123', today)
+rentMovie('Sara Moura', '128', late_date)
+
+# List late entries
 listLateRents()
-
