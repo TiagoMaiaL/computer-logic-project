@@ -1,6 +1,7 @@
 import os.path
 import csv
-import datetime
+from datetime import datetime
+from datetime import timedelta
 
 CLIENTS_PATH = './clients.csv'
 NAME_KEY = 'name'
@@ -17,6 +18,8 @@ MOVIES_FIELD_NAMES = [TYPE_KEY, CODE_KEY, NAME_KEY, YEAR_KEY]
 RENTS_PATH = './rents.csv'
 DATE_KEY = 'date'
 RENT_FIELD_NAMES = [NAME_KEY, CODE_KEY, DATE_KEY]
+
+DATE_FORMAT = '%d/%m/%y %H:%M:%S'
 
 def write(header, content, path):
     """
@@ -35,23 +38,28 @@ def write(header, content, path):
 
     writer.writerow(content)
 
+def getEntry(key, value, path):
+    """
+    Given the key and value of an entry, and the csv file path,
+    returns the found entry in the csv, or none.
+    """
+    try:
+        reader = csv.DictReader(open(path))
+        for entry in reader:
+            if entry[key] == value:
+                return entry
+    except:
+        return None
+
+    return None
+
 def hasEntry(key, value, path):
     """
     Given the key and value of an entry, and the csv file path,
     returns if the csv contains an entry with the provided value.
     """
-
-    didFind = False
+    return getEntry(key, value, path) != None
     
-    try:
-        reader = csv.DictReader(open(path))
-        for entry in reader:
-            if entry[key] == str(value):
-                didFind = True
-    except:
-	didFind = False
-    
-    return didFind
 
 def storeClient(name, cpf, rg):
     """
@@ -107,13 +115,34 @@ def rentMovie(name, movieCode, date):
     write(RENT_FIELD_NAMES, rentEntry, RENTS_PATH)
 
 def listLateRents():
-    print("listing late entries")
+    """
+    Lists all rents that are currently late.
+    """
+    try:
+        didDisplayHeader = False
+        rentsReader = csv.DictReader(open(RENTS_PATH))
 
-today = datetime.datetime.now()
-past_date = today - datetime.timedelta(days = 7)
+        for rent in rentsReader:
+            client = getEntry(NAME_KEY, rent[NAME_KEY], CLIENTS_PATH)
+            movie = getEntry(CODE_KEY, rent[CODE_KEY], MOVIES_PATH)
+            rentDate = datetime.fromisoformat(rent[DATE_KEY])
+            today = datetime.now()
 
-print(today)
-print(past_date)
+            difference = (today - rentDate).days
 
-rentMovie("testing", 223, today)
+            if difference >= 7:
+                if not didDisplayHeader:
+                    didDisplayHeader = False
+                    print('CPF|Name|Title|Rent_date|Situation|Days')
+
+                print(client[CPF_KEY][:6], '|', client[NAME_KEY][:6], '|', movie[NAME_KEY], '|', datetime.strftime(rentDate, DATE_FORMAT), '|', "Late", '|', difference)
+
+    except:
+        print("Couldn't open rents.csv")
+
+today = datetime.now()
+past_date = today - timedelta(days = 8)
+
+rentMovie("testing", 223, past_date)
+listLateRents()
 
